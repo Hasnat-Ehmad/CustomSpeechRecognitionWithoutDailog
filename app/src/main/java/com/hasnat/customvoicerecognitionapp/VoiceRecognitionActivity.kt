@@ -1,211 +1,174 @@
-package com.hasnat.customvoicerecognitionapp;
+package com.hasnat.customvoicerecognitionapp
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
-import android.util.Log;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
+import android.Manifest
+import androidx.appcompat.app.AppCompatActivity
+import android.speech.RecognitionListener
+import android.widget.TextView
+import android.widget.ToggleButton
+import android.widget.ProgressBar
+import android.speech.SpeechRecognizer
+import android.content.Intent
+import android.os.Bundle
+import com.hasnat.customvoicerecognitionapp.R
+import android.speech.RecognizerIntent
+import android.widget.CompoundButton
+import androidx.core.app.ActivityCompat
+import com.hasnat.customvoicerecognitionapp.VoiceRecognitionActivity
+import android.content.pm.PackageManager
+import android.util.Log
+import android.view.View
+import android.widget.Toast
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import java.util.ArrayList;
-
-public class VoiceRecognitionActivity extends AppCompatActivity implements
-        RecognitionListener {
-
-    private static final int REQUEST_RECORD_PERMISSION = 100;
-    private TextView returnedText;
-    private ToggleButton toggleButton;
-    private ProgressBar progressBar;
-    private SpeechRecognizer speech = null;
-    private Intent recognizerIntent;
-    private String LOG_TAG = "VoiceRecognitionActivity123";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        returnedText = (TextView) findViewById(R.id.textView1);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar1);
-        toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
-
-
-        progressBar.setVisibility(View.INVISIBLE);
-        speech = SpeechRecognizer.createSpeechRecognizer(this);
-        speech.setRecognitionListener(this);
-
-        Log.i(LOG_TAG, "isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this));
-        recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
-                "en");
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-
-        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView,
-                                         boolean isChecked) {
-                if (isChecked) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    progressBar.setIndeterminate(true);
-                    ActivityCompat.requestPermissions
-                            (VoiceRecognitionActivity.this,
-                                    new String[]{Manifest.permission.RECORD_AUDIO},
-                                    REQUEST_RECORD_PERMISSION);
-                } else {
-                    progressBar.setIndeterminate(false);
-                    progressBar.setVisibility(View.INVISIBLE);
-                    speech.stopListening();
-                }
-            }
-        });
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_RECORD_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                speech.startListening(recognizerIntent);
-                Log.e(LOG_TAG, "listening start");
+class VoiceRecognitionActivity : AppCompatActivity(), RecognitionListener {
+    private var returnedText: TextView? = null
+    private var toggleButton: ToggleButton? = null
+    private var progressBar: ProgressBar? = null
+    private var speech: SpeechRecognizer? = null
+    private var recognizerIntent: Intent? = null
+    private val LOG_TAG = "RecognitionActivity"
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        returnedText = findViewById<View>(R.id.textView1) as TextView
+        progressBar = findViewById<View>(R.id.progressBar1) as ProgressBar
+        toggleButton = findViewById<View>(R.id.toggleButton1) as ToggleButton
+        progressBar!!.visibility = View.INVISIBLE
+        speech = SpeechRecognizer.createSpeechRecognizer(this)
+        speech!!.setRecognitionListener(this)
+        Log.i(LOG_TAG, "isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
+        recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        recognizerIntent!!.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
+            "en"
+        )
+        recognizerIntent!!.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        recognizerIntent!!.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+        toggleButton!!.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                progressBar!!.visibility = View.VISIBLE
+                progressBar!!.isIndeterminate = true
+                ActivityCompat.requestPermissions(
+                    this@VoiceRecognitionActivity, arrayOf(Manifest.permission.RECORD_AUDIO),
+                    REQUEST_RECORD_PERMISSION
+                )
             } else {
-                Toast.makeText(VoiceRecognitionActivity.this, "Permission Denied!", Toast
-                        .LENGTH_SHORT).show();
+                progressBar!!.isIndeterminate = false
+                progressBar!!.visibility = View.INVISIBLE
+                speech!!.stopListening()
             }
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_RECORD_PERMISSION) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                speech!!.startListening(recognizerIntent)
+                Log.e(LOG_TAG, "listening start")
+            } else {
+                Toast.makeText(
+                    this@VoiceRecognitionActivity,
+                    "Permission Denied!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
+    public override fun onResume() {
+        super.onResume()
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
+    override fun onPause() {
+        super.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
         if (speech != null) {
-            speech.destroy();
-            Log.i(LOG_TAG, "destroy");
+            speech!!.destroy()
+            Log.i(LOG_TAG, "destroy")
         }
     }
 
-
-    @Override
-    public void onBeginningOfSpeech() {
-        Log.i(LOG_TAG, "onBeginningOfSpeech");
-        progressBar.setIndeterminate(false);
-        progressBar.setMax(10);
+    override fun onBeginningOfSpeech() {
+        Log.i(LOG_TAG, "onBeginningOfSpeech")
+        progressBar!!.isIndeterminate = false
+        progressBar!!.max = 10
     }
 
-    @Override
-    public void onBufferReceived(byte[] buffer) {
-        Log.i(LOG_TAG, "onBufferReceived: " + buffer);
+    override fun onBufferReceived(buffer: ByteArray) {
+        Log.i(LOG_TAG, "onBufferReceived: $buffer")
     }
 
-    @Override
-    public void onEndOfSpeech() {
-        Log.i(LOG_TAG, "onEndOfSpeech");
-        progressBar.setIndeterminate(true);
-        toggleButton.setChecked(false);
+    override fun onEndOfSpeech() {
+        Log.i(LOG_TAG, "onEndOfSpeech")
+        progressBar!!.isIndeterminate = true
+        toggleButton!!.isChecked = false
     }
 
-    @Override
-    public void onError(int errorCode) {
-        String errorMessage = getErrorText(errorCode);
-        Log.d(LOG_TAG, "FAILED " + errorMessage);
-        returnedText.setText(errorMessage);
-        toggleButton.setChecked(false);
+    override fun onError(errorCode: Int) {
+        val errorMessage = getErrorText(errorCode)
+        Log.d(LOG_TAG, "FAILED $errorMessage")
+        returnedText!!.text = errorMessage
+        toggleButton!!.isChecked = false
     }
 
-    @Override
-    public void onEvent(int arg0, Bundle arg1) {
-        Log.i(LOG_TAG, "onEvent");
+    override fun onEvent(arg0: Int, arg1: Bundle) {
+        Log.i(LOG_TAG, "onEvent")
     }
 
-    @Override
-    public void onPartialResults(Bundle arg0) {
-        Log.i(LOG_TAG, "onPartialResults");
+    override fun onPartialResults(arg0: Bundle) {
+        Log.i(LOG_TAG, "onPartialResults")
     }
 
-    @Override
-    public void onReadyForSpeech(Bundle arg0) {
-        Log.i(LOG_TAG, "onReadyForSpeech");
+    override fun onReadyForSpeech(arg0: Bundle) {
+        Log.i(LOG_TAG, "onReadyForSpeech")
     }
 
-    @Override
-    public void onResults(Bundle results) {
-        Log.i(LOG_TAG, "onResults");
-        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+    override fun onResults(results: Bundle) {
+        Log.i(LOG_TAG, "onResults")
+        val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
 
-       /* ArrayList<String> matches = results
+        /* ArrayList<String> matches = results
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);*/
-        String text = "";
-        for (String result : matches)
-            text += result + "\n";
-
-        returnedText.setText(matches.get(0));
+        var text = ""
+        for (result in matches!!) text += """
+     $result
+     
+     """.trimIndent()
+        returnedText!!.text = matches[0]
     }
 
-    @Override
-    public void onRmsChanged(float rmsdB) {
-        Log.i(LOG_TAG, "onRmsChanged: " + rmsdB);
-        progressBar.setProgress((int) rmsdB);
+    override fun onRmsChanged(rmsdB: Float) {
+        Log.i(LOG_TAG, "onRmsChanged: $rmsdB")
+        progressBar!!.progress = rmsdB.toInt()
     }
 
-    public static String getErrorText(int errorCode) {
-        String message;
-        switch (errorCode) {
-            case SpeechRecognizer.ERROR_AUDIO:
-                message = "Audio recording error";
-                break;
-            case SpeechRecognizer.ERROR_CLIENT:
-                message = "Client side error";
-                break;
-            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                message = "Insufficient permissions";
-                break;
-            case SpeechRecognizer.ERROR_NETWORK:
-                message = "Network error";
-                break;
-            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-                message = "Network timeout";
-                break;
-            case SpeechRecognizer.ERROR_NO_MATCH:
-                message = "No match";
-                break;
-            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                message = "RecognitionService busy";
-                break;
-            case SpeechRecognizer.ERROR_SERVER:
-                message = "error from server";
-                break;
-            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                message = "No speech input";
-                break;
-            default:
-                message = "Didn't understand, please try again.";
-                break;
+    companion object {
+        private const val REQUEST_RECORD_PERMISSION = 100
+        fun getErrorText(errorCode: Int): String {
+            val message: String
+            message = when (errorCode) {
+                SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+                SpeechRecognizer.ERROR_CLIENT -> "Client side error"
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+                SpeechRecognizer.ERROR_NETWORK -> "Network error"
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
+                SpeechRecognizer.ERROR_NO_MATCH -> "No match"
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
+                SpeechRecognizer.ERROR_SERVER -> "error from server"
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
+                else -> "Didn't understand, please try again."
+            }
+            return message
         }
-        return message;
     }
 }
